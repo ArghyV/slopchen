@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" fill="#f5f5f5"/>
+  <rect x="128" y="128" width="256" height="256" fill="#e63946"/>
+  <rect x="176" y="128" width="160" height="128" fill="#f5f5f5"/>
+  <rect x="176" y="256" width="160" height="128" fill="#f5f5f5"/>
+  <text x="256" y="192" font-family="sans-serif" font-size="64" fill="#e63946" text-anchor="middle">♥</text>
+  <text x="192" y="256" font-family="sans-serif" font-size="64" fill="#f1c40f" text-anchor="middle">♦</text>
+  <text x="320" y="256" font-family="sans-serif" font-size="64" fill="#2a9d8f" text-anchor="middle">♣</text>
+  <text x="256" y="320" font-family="sans-serif" font-size="64" fill="#1d3557" text-anchor="middle">♠</text>
+  <text x="256" y="448" font-family="sans-serif" font-size="48" fill="#1d3557" text-anchor="middle" font-weight="bold">Slopchen</text>
+</svg>

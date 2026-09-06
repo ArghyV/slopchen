@@ -1,0 +1,11 @@
+This is a placeholder for the 192x192 icon.
+To create the actual icon, use a graphics tool to create a 192x192 PNG with the Slopchen logo.
+The icon should feature a Swiss cross design with the card suits (H, S, E, G) in the four quadrants.
+
+Suggested design:
+- White background
+- Swiss cross in red (#e63946) in the center
+- Four card suit symbols (♥, ♦, ♣, ♠) in the four corners
+- Clean, minimalist 1960s Swiss design style
+
+To use this, rename the file to icon-192.png and replace with actual image content.
