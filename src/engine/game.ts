@@ -76,7 +76,9 @@ export function applyMove(state: GameState, move: GameMove): GameState {
     case 'exchange':
       return applyExchangeAction(newState, action);
     default:
-      throw new Error(`Unknown action type: ${(action as any).type}`);
+      // TypeScript should never reach here if all action types are handled
+      const _exhaustiveCheck: never = action;
+      throw new Error(`Unknown action type: ${(_exhaustiveCheck as any).type}`);
   }
 }
 
