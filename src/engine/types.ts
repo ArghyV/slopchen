@@ -17,6 +17,7 @@ export interface GameMove {
 export interface GameState {
   id: string;
   trump: TrumpSuit;
+  trumpCard: Card | null;
   dealer: 'p0' | 'p1';
   talon: Card[];
   trick: Card[];

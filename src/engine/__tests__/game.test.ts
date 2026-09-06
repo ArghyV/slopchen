@@ -23,18 +23,19 @@ describe('game.ts', () => {
       expect(state.tricks.p1).toBe(0);
     });
 
-    it('should deal 5 cards to each player and 10 to talon', () => {
+    it('should deal 5 cards to each player and 9 to talon + 1 trump card', () => {
       const state = initializeGame('p0', 42);
       
       expect(state.hands.p0.length).toBe(5);
       expect(state.hands.p1.length).toBe(5);
-      expect(state.talon.length).toBe(10);
+      expect(state.talon.length).toBe(9);
+      expect(state.trumpCard).toBeDefined();
     });
 
     it('should have all 20 cards distributed', () => {
       const state = initializeGame('p0', 42);
       
-      const allCards = [...state.hands.p0, ...state.hands.p1, ...state.talon];
+      const allCards = [...state.hands.p0, ...state.hands.p1, ...state.talon, state.trumpCard!];
       expect(allCards.length).toBe(20);
       
       // Check no duplicates
@@ -99,8 +100,22 @@ describe('game.ts', () => {
 
     it('should resolve trick when second card is played', () => {
       const state = initializeGame('p0', 42);
+      state.closed = true; // Close talon so suit-following is enforced
+      state.trick = [];
+      state.currentPlayer = 'p1';
+      state.leader = 'p1';
+      state.trumpCard = 'S10' as Card;
+      // Give both players cards of the same suit
+      state.hands.p1 = ['HA', 'H10', 'HK'] as Card[];
+      state.hands.p0 = ['HO', 'HU', 'HQ'] as Card[];
+      state.trump = 'S';
+      state.points = { p0: 0, p1: 0 };
+      state.melds = { p0: 0, p1: 0 };
+      state.tricks = { p0: 0, p1: 0 };
+      state.talon = [] as Card[];
+      state.turn = 0;
       
-      // p1 plays first card
+      // p1 plays first card (HA - Hearts)
       const card1 = state.hands.p1[0];
       const move1: GameMove = {
         action: { type: 'play', card: card1, player: 'p1' },
@@ -108,7 +123,7 @@ describe('game.ts', () => {
       };
       let newState = applyMove(state, move1);
       
-      // p0 plays second card
+      // p0 plays second card (must follow suit - Hearts)
       const card2 = newState.hands.p0[0];
       const move2: GameMove = {
         action: { type: 'play', card: card2, player: 'p0' },
