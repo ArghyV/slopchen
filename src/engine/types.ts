@@ -23,6 +23,7 @@ export interface GameState {
   hands: Record<'p0' | 'p1', Card[]>;
   points: Record<'p0' | 'p1', number>;
   melds: Record<'p0' | 'p1', number>;
+  tricks: Record<'p0' | 'p1', number>;
   closed: boolean;
   closer: 'p0' | 'p1' | null;
   currentPlayer: 'p0' | 'p1';

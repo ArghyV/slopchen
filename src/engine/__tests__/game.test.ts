@@ -19,6 +19,8 @@ describe('game.ts', () => {
       expect(state.points.p1).toBe(0);
       expect(state.melds.p0).toBe(0);
       expect(state.melds.p1).toBe(0);
+      expect(state.tricks.p0).toBe(0);
+      expect(state.tricks.p1).toBe(0);
     });
 
     it('should deal 5 cards to each player and 10 to talon', () => {
@@ -179,33 +181,42 @@ describe('game.ts', () => {
     it('should return p0 as winner when p0 has >= 66 points', () => {
       const state = initializeGame('p0', 42);
       state.points.p0 = 66;
-      state.points.p1 = 0;
+      state.points.p1 = 40;
+      state.tricks.p0 = 1;
+      state.tricks.p1 = 1;
       
       const outcome = getGameOutcome(state);
       expect(outcome.winner).toBe('p0');
-      expect(outcome.points.p0).toBe(66);
+      // p1 has 40+ points, so normal win (1 point)
+      expect(outcome.gamePoints.p0).toBe(1);
     });
 
     it('should return p1 as winner when p1 has >= 66 points', () => {
       const state = initializeGame('p0', 42);
-      state.points.p0 = 0;
+      state.points.p0 = 40;
       state.points.p1 = 66;
+      state.tricks.p0 = 1;
+      state.tricks.p1 = 1;
       
       const outcome = getGameOutcome(state);
       expect(outcome.winner).toBe('p1');
-      expect(outcome.points.p1).toBe(66);
+      // p0 has 40+ points, so normal win (1 point)
+      expect(outcome.gamePoints.p1).toBe(1);
     });
 
-    it('should include meld points in total', () => {
+    it('should include meld points in total and award Schneider', () => {
       const state = initializeGame('p0', 42);
       state.points.p0 = 40;
       state.melds.p0 = 30;
       state.points.p1 = 0;
       state.melds.p1 = 0;
+      state.tricks.p0 = 1;
+      state.tricks.p1 = 0;
       
       const outcome = getGameOutcome(state);
       expect(outcome.winner).toBe('p0');
-      expect(outcome.points.p0).toBe(70);
+      // p1 has 0 points (< 33) and 0 tricks, so Schwarz (3 points)
+      expect(outcome.gamePoints.p0).toBe(3);
     });
 
     it('should return p1 as winner when talon is empty and p0 has no cards', () => {
@@ -215,9 +226,12 @@ describe('game.ts', () => {
       state.hands.p1 = ['HA', 'H10'] as Card[];
       state.points.p0 = 20;
       state.points.p1 = 30;
+      state.tricks.p0 = 1;
+      state.tricks.p1 = 2;
       
       const outcome = getGameOutcome(state);
       expect(outcome.winner).toBe('p1');
+      expect(outcome.gamePoints.p1).toBeGreaterThan(0);
     });
 
     it('should return p0 as winner when talon is empty and p1 has no cards', () => {
@@ -227,9 +241,12 @@ describe('game.ts', () => {
       state.hands.p1 = [] as Card[];
       state.points.p0 = 30;
       state.points.p1 = 20;
+      state.tricks.p0 = 2;
+      state.tricks.p1 = 1;
       
       const outcome = getGameOutcome(state);
       expect(outcome.winner).toBe('p0');
+      expect(outcome.gamePoints.p0).toBeGreaterThan(0);
     });
   });
 

@@ -34,6 +34,9 @@ export function resolveTrick(state: GameState): GameState {
   // Add trick points to winner
   newState.points[winner] += getTrickPoints(newState.trick, newState.trump);
   
+  // Increment trick count for winner
+  newState.tricks[winner] = (newState.tricks[winner] || 0) + 1;
+  
   // Clear trick
   newState.trick = [];
   
