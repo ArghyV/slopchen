@@ -238,6 +238,17 @@ export function getGameOutcome(state: GameState): { winner: 'p0' | 'p1' | null; 
     if (state.hands.p1.length === 0) return { winner: 'p0', points: { p0: p0Total, p1: p1Total } };
   }
   
+  // Check if talon is closed and the closer failed to reach 66
+  // In real Schnapsen, if you close the talon and don't reach 66, you lose
+  if (state.closed && state.closer !== null) {
+    const closerTotal = state.closer === 'p0' ? p0Total : p1Total;
+    if (closerTotal < 66 && state.talon.length === 0) {
+      // Closer loses - opponent wins
+      const winner = state.closer === 'p0' ? 'p1' : 'p0';
+      return { winner, points: { p0: p0Total, p1: p1Total } };
+    }
+  }
+  
   return { winner: null, points: { p0: p0Total, p1: p1Total } };
 }
 
