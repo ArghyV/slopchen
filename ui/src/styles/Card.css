@@ -1,0 +1,356 @@
+/* Card Component Styles - 1960s Swiss Design */
+
+.card {
+  /* Base card dimensions - Swiss playing card proportions */
+  width: 80px;
+  height: 120px;
+  
+  /* Clean, square corners - authentic Swiss design */
+  border-radius: var(--border-radius-0);
+  
+  /* Card background - off-white with subtle texture */
+  background-color: var(--color-surface);
+  
+  /* Solid border - traditional card feel */
+  border: var(--border-width-normal) solid var(--color-border);
+  
+  /* Shadow for depth */
+  box-shadow: var(--shadow-md);
+  
+  /* Smooth transitions for interactions */
+  transition: transform var(--transition-fast), 
+              box-shadow var(--transition-fast);
+  
+  /* Positioning */
+  position: relative;
+  overflow: hidden;
+  
+  /* Prevent text selection */
+  user-select: none;
+  -webkit-user-select: none;
+  
+  /* Touch-friendly */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Card hover and active states */
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.card:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Selected card state */
+.card.selected {
+  border-width: var(--border-width-thick);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent);
+}
+
+/* Disabled/Unplayable card state */
+.card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(50%);
+}
+
+.card.disabled:hover {
+  transform: none;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Card with trump indicator */
+.card.trump {
+  border-color: var(--suit-trump);
+  box-shadow: 0 0 8px rgba(230, 57, 70, 0.3);
+}
+
+/* Card face - contains rank and suit */
+.card-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--spacing-2);
+  color: var(--color-text);
+}
+
+/* Card corner - top-left and bottom-right */
+.card-corner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.card-corner.bottom {
+  align-items: flex-end;
+  transform: rotate(180deg);
+}
+
+/* Rank symbol */
+.card-rank {
+  font-family: var(--font-family);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  letter-spacing: -0.02em;
+}
+
+/* Suit symbol */
+.card-suit {
+  font-family: var(--font-family);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin-top: var(--spacing-1);
+}
+
+/* Centered card content for face-up cards */
+.card-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+/* Large centered rank */
+.card-center .rank {
+  font-family: var(--font-family);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+}
+
+/* Large centered suit */
+.card-center .suit {
+  font-family: var(--font-family);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Card back - Swiss cross pattern */
+.card-back {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--color-background),
+    var(--color-background) 10px,
+    var(--color-border) 10px,
+    var(--color-border) 20px
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Swiss cross on card back */
+.card-back::before {
+  content: '';
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: var(--color-swiss-red);
+  clip-path: polygon(
+    20% 0%, 20% 35%, 0% 35%, 0% 65%, 20% 65%, 20% 100%,
+    80% 100%, 80% 65%, 100% 65%, 100% 35%, 80% 35%, 80% 0%
+  );
+}
+
+/* Suit-specific styling */
+.card.suit-H .card-suit,
+.card.suit-H .card-center .suit,
+.card.suit-H .card-corner .suit {
+  color: var(--suit-hearts);
+}
+
+.card.suit-S .card-suit,
+.card.suit-S .card-center .suit,
+.card.suit-S .card-corner .suit {
+  color: var(--suit-bells);
+}
+
+.card.suit-E .card-suit,
+.card.suit-E .card-center .suit,
+.card.suit-E .card-corner .suit {
+  color: var(--suit-acorns);
+}
+
+.card.suit-G .card-suit,
+.card.suit-G .card-center .suit,
+.card.suit-G .card-corner .suit {
+  color: var(--suit-leaves);
+}
+
+/* Trump card - bold border */
+.card.trump {
+  border-width: var(--border-width-thick);
+}
+
+.card.trump .card-suit,
+.card.trump .card-center .suit,
+.card.trump .card-corner .suit {
+  color: var(--suit-trump) !important;
+}
+
+/* Card in hand - slightly fanned */
+.card.in-hand {
+  margin: 0 var(--spacing-1);
+}
+
+.card.in-hand:nth-child(odd) {
+  transform: rotate(-2deg) translateY(0);
+}
+
+.card.in-hand:nth-child(even) {
+  transform: rotate(2deg) translateY(0);
+}
+
+.card.in-hand:hover {
+  transform: rotate(0) translateY(-8px) !important;
+  z-index: 10;
+}
+
+/* Card in trick pile */
+.card.in-trick {
+  width: 60px;
+  height: 90px;
+  margin: var(--spacing-1);
+}
+
+.card.in-trick:nth-child(1) {
+  transform: translateX(-20px) rotate(-10deg);
+}
+
+.card.in-trick:nth-child(2) {
+  transform: translateX(20px) rotate(10deg);
+}
+
+/* Card in talon */
+.card.in-talon {
+  width: 60px;
+  height: 90px;
+  cursor: default;
+}
+
+.card.in-talon:hover {
+  transform: none;
+}
+
+/* Animation for card play */
+@keyframes playCard {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-50px) scale(1.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.card.playing {
+  animation: playCard var(--transition-slow) ease-out;
+  z-index: 100;
+}
+
+/* Animation for card draw */
+@keyframes drawCard {
+  0% {
+    transform: translateY(-100px) scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.card.drawing {
+  animation: drawCard var(--transition-normal) ease-out;
+}
+
+/* Responsive card sizes */
+@media (min-width: 768px) {
+  .card {
+    width: 100px;
+    height: 150px;
+  }
+  
+  .card.in-trick,
+  .card.in-talon {
+    width: 70px;
+    height: 105px;
+  }
+  
+  .card-center .rank {
+    font-size: 2.5rem;
+  }
+  
+  .card-center .suit {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    width: 70px;
+    height: 105px;
+  }
+  
+  .card.in-hand {
+    margin: 0 var(--spacing-1);
+  }
+  
+  .card.in-trick,
+  .card.in-talon {
+    width: 50px;
+    height: 75px;
+  }
+  
+  .card-corner {
+    padding: var(--spacing-1);
+  }
+  
+  .card-rank {
+    font-size: var(--font-size-lg);
+  }
+  
+  .card-suit {
+    font-size: var(--font-size-base);
+  }
+}
+
+/* High contrast mode for accessibility */
+@media (prefers-contrast: high) {
+  .card {
+    border-width: var(--border-width-thick);
+  }
+  
+  .card-face {
+    color: var(--color-text);
+  }
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .card:hover,
+  .card:active,
+  .card.playing,
+  .card.drawing {
+    animation: none;
+    transform: none;
+  }
+}
