@@ -61,58 +61,19 @@ export function isLegalPlay(state: GameState, card: Card, player: 'p0' | 'p1'): 
 }
 
 /**
- * Estimate the points a player would get from the current trick.
- * This is a simplified estimation that assumes the player can win the trick.
- * 
- * @param state - The current game state
- * @param player - The player to estimate for
- * @returns Estimated points from the current trick
- */
-function estimateTrickPoints(state: GameState, player: 'p0' | 'p1'): number {
-  const hand = state.hands[player];
-  const leadSuit = state.trick.length > 0 ? getSuit(state.trick[0]) : null;
-  
-  if (!leadSuit) return 0;
-  
-  // Check if player has any card that can win the trick
-  for (const card of hand) {
-    const cardSuit = getSuit(card);
-    if (cardSuit === leadSuit || isTrump(card, state.trump)) {
-      // Player can potentially win - return all points in trick
-      const pointsMap: Record<'A' | '10' | 'K' | 'O' | 'U', number> = {
-        A: 11, '10': 10, K: 4, O: 3, U: 2
-      };
-      return state.trick.reduce((sum, c) => {
-        const rank = c.slice(1) as 'A' | '10' | 'K' | 'O' | 'U';
-        return sum + pointsMap[rank];
-      }, 0);
-    }
-  }
-  
-  return 0;
-}
-
-/**
  * Check if a player can close the talon.
  * 
  * Rules:
  * - Player must be the current leader (state.leader === player)
  * - Talon must not already be closed
- * - Player must have >= 50 points (banked + melds + current trick if winning)
+ * - Either player can close on their lead at any time (no point requirement)
  * 
  * @param state - The current game state
  * @param player - The player attempting to close
  * @returns true if the player can close the talon
  */
 export function canCloseTalon(state: GameState, player: 'p0' | 'p1'): boolean {
-  if (state.closed || state.leader !== player) {
-    return false;
-  }
-  
-  const playerPoints = state.points[player] + state.melds[player];
-  const trickPoints = state.trick.length > 0 ? estimateTrickPoints(state, player) : 0;
-  
-  return playerPoints + trickPoints >= 50;
+  return !state.closed && state.leader === player;
 }
 
 /**

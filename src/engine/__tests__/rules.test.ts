@@ -128,37 +128,27 @@ describe('rules.ts', () => {
     it('should return false when talon is already closed', () => {
       state.closed = true;
       state.leader = 'p0';
-      state.points.p0 = 50;
       
       expect(canCloseTalon(state, 'p0')).toBe(false);
     });
 
     it('should return false when player is not leader', () => {
       state.leader = 'p1';
-      state.points.p0 = 50;
       
       expect(canCloseTalon(state, 'p0')).toBe(false);
     });
 
-    it('should return false when player has less than 50 points', () => {
+    it('should return true when player is leader and talon is open', () => {
       state.leader = 'p0';
-      state.points.p0 = 40;
+      state.points.p0 = 0;
       state.melds.p0 = 0;
-      
-      expect(canCloseTalon(state, 'p0')).toBe(false);
-    });
-
-    it('should return true when player has >= 50 points and is leader', () => {
-      state.leader = 'p0';
-      state.points.p0 = 40;
-      state.melds.p0 = 10;
       
       expect(canCloseTalon(state, 'p0')).toBe(true);
     });
 
-    it('should return true when player has exactly 50 points', () => {
+    it('should return true when player is leader with any points', () => {
       state.leader = 'p0';
-      state.points.p0 = 50;
+      state.points.p0 = 10;
       state.melds.p0 = 0;
       
       expect(canCloseTalon(state, 'p0')).toBe(true);
