@@ -1,5 +1,7 @@
 import type { Card, Suit, TrumpSuit } from './cards';
 
+export type { Card, Suit, TrumpSuit };
+
 export type GameAction =
   | { type: 'play'; card: Card; player: 'p0' | 'p1' }
   | { type: 'draw'; player: 'p0' | 'p1' }
