@@ -48,20 +48,21 @@ describe('deck.ts', () => {
   });
 
   describe('deal', () => {
-    it('should deal 5 cards to each player and 10 to talon', () => {
+    it('should deal 5 cards to each player and 9 to talon + 1 trump card', () => {
       const deck = [...DECK];
-      const { p0, p1, talon } = deal(deck);
+      const { p0, p1, talon, trumpCard } = deal(deck);
       
       expect(p0.length).toBe(5);
       expect(p1.length).toBe(5);
-      expect(talon.length).toBe(10);
+      expect(talon.length).toBe(9);
+      expect(trumpCard).toBeDefined();
     });
 
     it('should deal all cards from the deck', () => {
       const deck = [...DECK];
-      const { p0, p1, talon } = deal(deck);
+      const { p0, p1, talon, trumpCard } = deal(deck);
       
-      const allCards = [...p0, ...p1, ...talon];
+      const allCards = [...p0, ...p1, ...talon, trumpCard];
       expect(allCards.length).toBe(20);
       expect(new Set(allCards).size).toBe(20);
     });
@@ -97,33 +98,36 @@ describe('deck.ts', () => {
 
     it('should work with exactly 20 cards', () => {
       const deck = [...DECK];
-      const { p0, p1, talon } = deal(deck);
+      const { p0, p1, talon, trumpCard } = deal(deck);
       
       expect(p0.length).toBe(5);
       expect(p1.length).toBe(5);
-      expect(talon.length).toBe(10);
+      expect(talon.length).toBe(9);
+      expect(trumpCard).toBeDefined();
     });
 
     it('should work with more than 20 cards', () => {
       const deck = [...DECK, ...DECK];
-      const { p0, p1, talon } = deal(deck);
+      const { p0, p1, talon, trumpCard } = deal(deck);
       
       expect(p0.length).toBe(5);
       expect(p1.length).toBe(5);
-      expect(talon.length).toBe(30);
+      expect(talon.length).toBe(29);
+      expect(trumpCard).toBeDefined();
     });
 
     it('should use the last cards for dealing (pop from end)', () => {
       const deck = ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10',
                     'C11', 'C12', 'C13', 'C14', 'C15', 'C16', 'C17', 'C18', 'C19', 'C20'];
-      const { p0, p1, talon } = deal(deck as any);
+      const { p0, p1, talon, trumpCard } = deal(deck as any);
       
       // Last 5 cards should go to p0 (popped first)
       expect(p0).toEqual(['C20', 'C19', 'C18', 'C17', 'C16']);
       // Next 5 cards should go to p1
       expect(p1).toEqual(['C15', 'C14', 'C13', 'C12', 'C11']);
-      // Remaining cards go to talon
-      expect(talon).toEqual(['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10']);
+      // C10 is the trump card, rest go to talon
+      expect(talon).toEqual(['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9']);
+      expect(trumpCard).toBe('C10');
     });
   });
 });

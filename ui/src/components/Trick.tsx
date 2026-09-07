@@ -102,7 +102,7 @@ export const Trick: React.FC<TrickProps> = ({
               marginBottom: '0.25rem',
             }}
           >
-            Player {index === 0 ? '1' : '2'}
+            {index === 0 ? 'Leader' : 'Follower'}
           </span>
           
           <Card

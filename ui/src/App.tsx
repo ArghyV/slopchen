@@ -39,7 +39,7 @@ export const App: React.FC = () => {
    */
   const startNewGame = React.useCallback(() => {
     // Player is always p0, AI is p1
-    const newGame = initializeGame('p0', 42); // Using fixed seed for deterministic gameplay
+    const newGame = initializeGame('p0', Math.random()); // Use random seed
     setGameState(newGame);
     setSelectedCard(null);
     setPhase('waiting_for_player');
@@ -197,16 +197,20 @@ export const App: React.FC = () => {
   const getTrickWinner = React.useCallback((): Player | null => {
     if (!gameState || gameState.trick.length !== 2) return null;
     
-    // Simple comparison - first card is lead
+    const { compareCards } = require('../../../src/engine/cards');
     const leadCard = gameState.trick[0];
     const followCard = gameState.trick[1];
     const leadSuit = getSuit(leadCard);
     const trump = gameState.trump;
     
-    const leadSuitIndex = gameState.trick.findIndex(c => getSuit(c) === leadSuit);
-    const winnerIndex = leadSuitIndex === 0 ? 0 : 1;
+    const comparison = compareCards(leadCard, followCard, trump, leadSuit);
+    // If leadCard > followCard, leadCard wins (p0 if p0 led, p1 if p1 led)
+    // But we need to know who played which card
+    // trick[0] is always the leader's card, trick[1] is the follower's
+    // So if comparison > 0, leader wins; else follower wins
+    const winner = comparison > 0 ? gameState.leader : (gameState.leader === 'p0' ? 'p1' : 'p0');
     
-    return winnerIndex === 0 ? 'p0' : 'p1';
+    return winner;
   }, [gameState]);
 
   // Derive UI state from game state

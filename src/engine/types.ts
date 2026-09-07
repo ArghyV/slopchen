@@ -17,12 +17,14 @@ export interface GameMove {
 export interface GameState {
   id: string;
   trump: TrumpSuit;
+  trumpCard: Card | null;
   dealer: 'p0' | 'p1';
   talon: Card[];
   trick: Card[];
   hands: Record<'p0' | 'p1', Card[]>;
   points: Record<'p0' | 'p1', number>;
   melds: Record<'p0' | 'p1', number>;
+  tricks: Record<'p0' | 'p1', number>;
   closed: boolean;
   closer: 'p0' | 'p1' | null;
   currentPlayer: 'p0' | 'p1';

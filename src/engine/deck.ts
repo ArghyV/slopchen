@@ -39,11 +39,12 @@ export function shuffleDeck(seed?: number): Card[] {
 
 /**
  * Deal cards from a shuffled deck.
- * Deals 5 cards to each player (p0 and p1), and 10 cards to the talon.
+ * Deals 5 cards to each player (p0 and p1), and the remaining 10 to the talon.
+ * The first card of the talon is turned face-up as the trump indicator.
  * @param deck - The shuffled deck (must have at least 20 cards)
- * @returns An object with hands for p0, p1, and the talon
+ * @returns An object with hands for p0, p1, the talon, and the trump card
  */
-export function deal(deck: Card[]): { p0: Card[]; p1: Card[]; talon: Card[] } {
+export function deal(deck: Card[]): { p0: Card[]; p1: Card[]; talon: Card[]; trumpCard: Card } {
   if (deck.length < 20) {
     throw new Error(`Deck must have at least 20 cards, got ${deck.length}`);
   }
@@ -62,8 +63,9 @@ export function deal(deck: Card[]): { p0: Card[]; p1: Card[]; talon: Card[] } {
     p1.push(deck.pop()!);
   }
   
-  // Remaining 10 cards go to talon
+  // Remaining 10 cards: first is trump indicator (face-up), rest are face-down
+  const trumpCard = deck.pop()!;
   talon.push(...deck);
   
-  return { p0, p1, talon };
+  return { p0, p1, talon, trumpCard };
 }

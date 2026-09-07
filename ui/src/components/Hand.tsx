@@ -105,7 +105,7 @@ export const Hand: React.FC<HandProps> = ({
           trump={trump}
           isSelected={selectedCard === card}
           isDisabled={disabledCards.has(card) && isCurrentPlayer}
-          isFaceUp={true}
+          isFaceUp={isCurrentPlayer}
           onClick={handleCardClick}
           className={`in-hand ${selectedCard === card ? 'selected' : ''}`}
           style={{

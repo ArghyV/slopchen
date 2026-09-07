@@ -25,24 +25,22 @@ function generateId(): string {
  */
 export function initializeGame(dealer: 'p0' | 'p1' = 'p0', seed?: number): GameState {
   const shuffledDeck = shuffleDeck(seed);
-  const { p0, p1, talon } = deal(shuffledDeck);
+  const { p0, p1, talon, trumpCard } = deal(shuffledDeck);
   
-  // Select random trump suit
-  const suits: Suit[] = ['H', 'S', 'E', 'G'];
-  const trumpIndex = seed !== undefined 
-    ? (seed % suits.length + suits.length) % suits.length
-    : Math.floor(Math.random() * suits.length);
-  const trump = suits[trumpIndex];
+  // Trump suit is determined by the trump card (first card of talon)
+  const trump = getSuit(trumpCard) as TrumpSuit;
   
   return {
     id: generateId(),
     trump,
+    trumpCard,
     dealer,
     talon,
     trick: [],
     hands: { p0, p1 },
     points: { p0: 0, p1: 0 },
     melds: { p0: 0, p1: 0 },
+    tricks: { p0: 0, p1: 0 },
     closed: false,
     closer: null,
     currentPlayer: dealer === 'p0' ? 'p1' : 'p0', // Non-dealer plays first
@@ -171,11 +169,35 @@ function applyMeldAction(state: GameState, action: Extract<GameAction, { type: '
 
 /**
  * Apply an exchange action to the game state.
+ * 
+ * Rules:
+ * - Player must be the current leader
+ * - Talon must be open (not closed)
+ * - Talon must not be empty
+ * - Player must have trump Unter
+ * - Player must not already have trump Ace
+ * - Trump Ace must be the face-up trump card under the talon
  */
 function applyExchangeAction(state: GameState, action: Extract<GameAction, { type: 'exchange' }>): GameState {
   const { player } = action;
   
-  // Check if player can exchange
+  // Preconditions
+  if (state.leader !== player) {
+    throw new Error(`Cannot exchange: ${player} is not the leader`);
+  }
+  
+  if (state.closed) {
+    throw new Error(`Cannot exchange: talon is closed`);
+  }
+  
+  if (state.talon.length === 0) {
+    throw new Error(`Cannot exchange: talon is empty`);
+  }
+  
+  if (state.trumpCard === null) {
+    throw new Error(`Cannot exchange: no trump card`);
+  }
+  
   const hand = state.hands[player];
   const trumpUnter = `${state.trump}U` as Card;
   const trumpAce = `${state.trump}A` as Card;
@@ -188,28 +210,15 @@ function applyExchangeAction(state: GameState, action: Extract<GameAction, { typ
     throw new Error(`Cannot exchange: ${player} already has trump Ace`);
   }
   
-  // Find trump Ace in talon or opponent's hand
-  // For simplicity, we'll assume it's in the talon
-  const talonIndex = state.talon.findIndex(c => c === trumpAce);
-  if (talonIndex === -1) {
-    // Check opponent's hand
-    const opponent = player === 'p0' ? 'p1' : 'p0';
-    if (!state.hands[opponent].includes(trumpAce)) {
-      throw new Error(`Cannot exchange: trump Ace not found in talon or opponent's hand`);
-    }
-    // Exchange with opponent - remove from opponent, add to player
-    const newState = { ...state };
-    newState.hands[player] = newState.hands[player].map(c => c === trumpUnter ? trumpAce : c);
-    newState.hands[opponent] = newState.hands[opponent].map(c => c === trumpAce ? trumpUnter : c);
-    newState.currentPlayer = player === 'p0' ? 'p1' : 'p0';
-    newState.turn++;
-    return newState;
+  // Can only exchange with the face-up trump card
+  if (state.trumpCard !== trumpAce) {
+    throw new Error(`Cannot exchange: trump Ace is not the face-up trump card`);
   }
   
-  // Exchange with talon
+  // Exchange trump Unter with the face-up trump card
   const newState = { ...state };
   newState.hands[player] = newState.hands[player].map(c => c === trumpUnter ? trumpAce : c);
-  newState.talon[talonIndex] = trumpUnter;
+  newState.trumpCard = trumpUnter;
   newState.currentPlayer = player === 'p0' ? 'p1' : 'p0';
   newState.turn++;
   
@@ -217,28 +226,88 @@ function applyExchangeAction(state: GameState, action: Extract<GameAction, { typ
 }
 
 /**
- * Get the current game outcome.
+ * Get the current game outcome with Schneider/Schwarz scoring.
+ * 
+ * Game points:
+ * - 1 point: opponent has 33+ points or took at least 1 trick
+ * - 2 points: opponent has < 33 points AND took at least 1 trick (Schneider)
+ * - 3 points: opponent has < 33 points AND took NO tricks (Schwarz)
  * 
  * @param state - The current game state
- * @returns Object with winner and points, or null if game is not over
+ * @returns Object with winner and gamePoints, or null if game is not over
  */
-export function getGameOutcome(state: GameState): { winner: 'p0' | 'p1' | null; points: Record<'p0' | 'p1', number> } {
+export function getGameOutcome(state: GameState): { winner: 'p0' | 'p1' | null; gamePoints: Record<'p0' | 'p1', number> } {
   const p0Total = state.points.p0 + state.melds.p0;
   const p1Total = state.points.p1 + state.melds.p1;
+  const p0Tricks = state.tricks.p0 || 0;
+  const p1Tricks = state.tricks.p1 || 0;
   
   // Check if game is over by points
   if (p0Total >= 66 || p1Total >= 66) {
     const winner = p0Total >= 66 ? 'p0' : 'p1';
-    return { winner, points: { p0: p0Total, p1: p1Total } };
+    const loser = winner === 'p0' ? 'p1' : 'p0';
+    const loserTotal = loser === 'p0' ? p0Total : p1Total;
+    const loserTricks = loser === 'p0' ? p0Tricks : p1Tricks;
+    
+    // Calculate game points for winner based on Schneider/Schwarz
+    let winnerGamePoints = 1;
+    if (loserTotal < 33 && loserTricks >= 1) {
+      winnerGamePoints = 2; // Schneider
+    } else if (loserTotal < 33 && loserTricks === 0) {
+      winnerGamePoints = 3; // Schwarz
+    }
+    
+    return { winner, gamePoints: { p0: winner === 'p0' ? winnerGamePoints : 0, p1: winner === 'p1' ? winnerGamePoints : 0 } };
   }
   
   // Check if talon is empty and a player has no cards
   if (state.talon.length === 0) {
-    if (state.hands.p0.length === 0) return { winner: 'p1', points: { p0: p0Total, p1: p1Total } };
-    if (state.hands.p1.length === 0) return { winner: 'p0', points: { p0: p0Total, p1: p1Total } };
+    if (state.hands.p0.length === 0) {
+      const winner = 'p1' as const;
+      const loserTotal = p0Total;
+      const loserTricks = p0Tricks;
+      let winnerGamePoints = 1;
+      if (loserTotal < 33 && loserTricks >= 1) {
+        winnerGamePoints = 2;
+      } else if (loserTotal < 33 && loserTricks === 0) {
+        winnerGamePoints = 3;
+      }
+      return { winner, gamePoints: { p0: 0, p1: winnerGamePoints } };
+    }
+    if (state.hands.p1.length === 0) {
+      const winner = 'p0' as const;
+      const loserTotal = p1Total;
+      const loserTricks = p1Tricks;
+      let winnerGamePoints = 1;
+      if (loserTotal < 33 && loserTricks >= 1) {
+        winnerGamePoints = 2;
+      } else if (loserTotal < 33 && loserTricks === 0) {
+        winnerGamePoints = 3;
+      }
+      return { winner, gamePoints: { p0: winnerGamePoints, p1: 0 } };
+    }
   }
   
-  return { winner: null, points: { p0: p0Total, p1: p1Total } };
+  // Check if talon is closed and the closer failed to reach 66
+  if (state.closed && state.closer !== null) {
+    const closerTotal = state.closer === 'p0' ? p0Total : p1Total;
+    if (closerTotal < 66 && state.talon.length === 0) {
+      // Closer loses - opponent wins
+      const winner = state.closer === 'p0' ? 'p1' : 'p0';
+      const loser = winner === 'p0' ? 'p1' : 'p0';
+      const loserTotal = loser === 'p0' ? p0Total : p1Total;
+      const loserTricks = loser === 'p0' ? p0Tricks : p1Tricks;
+      let winnerGamePoints = 1;
+      if (loserTotal < 33 && loserTricks >= 1) {
+        winnerGamePoints = 2;
+      } else if (loserTotal < 33 && loserTricks === 0) {
+        winnerGamePoints = 3;
+      }
+      return { winner, gamePoints: { p0: winner === 'p0' ? winnerGamePoints : 0, p1: winner === 'p1' ? winnerGamePoints : 0 } };
+    }
+  }
+  
+  return { winner: null, gamePoints: { p0: 0, p1: 0 } };
 }
 
 /**

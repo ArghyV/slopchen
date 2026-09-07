@@ -34,19 +34,23 @@ export function resolveTrick(state: GameState): GameState {
   // Add trick points to winner
   newState.points[winner] += getTrickPoints(newState.trick, newState.trump);
   
+  // Increment trick count for winner
+  newState.tricks[winner] = (newState.tricks[winner] || 0) + 1;
+  
   // Clear trick
   newState.trick = [];
   
   // Set leader to winner
   newState.leader = winner;
   
+  // Set current player to winner BEFORE drawing so winner draws first
+  newState.currentPlayer = winner;
+  
   // Draw new cards if talon is not closed/empty
   if (!newState.closed && newState.talon.length > 0) {
     return drawCards(newState);
   }
   
-  // Set current player to winner
-  newState.currentPlayer = winner;
   newState.turn++;
   
   return newState;
